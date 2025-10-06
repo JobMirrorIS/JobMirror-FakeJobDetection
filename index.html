@@ -1,0 +1,63 @@
+# BATCH 1 – Cleaning First 6 Columns
+# Columns: job_id, title, location, department, salary_range, company_profile
+
+import pandas as pd
+
+# Load dataset
+df = pd.read_csv("fake_job_postings.csv")
+
+
+# 1. job_id
+# What: Drop this column
+# Why: It's just a unique identifier and has no predictive value
+# How: Use df.drop()
+df.drop(columns=["job_id"], inplace=True)
+
+
+# 2. title
+# What: Clean the job title text
+# Why: Case consistency and text normalization
+# How: Lowercase + strip spaces + remove punctuation
+df['title'] = df['title'].astype(str).str.lower().str.strip()
+
+
+# 3. location
+# What: Extract useful info from messy location strings
+# Why: Some locations are missing city or have inconsistent formatting
+# How:
+#   - Extract country (first part before the first comma)
+#   - Optionally extract state
+df['country'] = df['location'].astype(str).str.split(',').str[0].str.strip().str.upper()
+df['state'] = df['location'].astype(str).str.split(',').str[1].str.strip().str.upper()
+
+# You can drop original location column after extracting
+df.drop(columns=['location'], inplace=True)
+
+
+# 4. department
+# What: Drop this column
+# Why: Often missing or vague (e.g., "tech", "general"), low information value
+# How: drop it
+df.drop(columns=['department'], inplace=True)
+
+
+# 5. salary_range
+# What: Create a new feature 'has_salary'
+# Why: The salary column is too sparse and inconsistent to fill or convert,
+#         but its presence or absence can be a useful indicator
+# How:
+df['has_salary'] = df['salary_range'].notnull().astype(int)
+# Optional: drop original column
+df.drop(columns=['salary_range'], inplace=True)
+
+
+# 6. company_profile
+# What: Drop this column
+# Why: Usually empty and not directly useful for modeling
+df.drop(columns=['company_profile'], inplace=True)
+
+
+# BATCH 1 CLEANED! Preview and save
+print("Batch 1 cleaned. Preview:")
+print(df.head())
+df.to_csv("cleaned_batch1.csv", index=False)
